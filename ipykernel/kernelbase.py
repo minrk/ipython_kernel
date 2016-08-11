@@ -463,7 +463,7 @@ class Kernel(SingletonConfigurable):
                                 reply_content, parent, ident)
         self.log.debug("%s", msg)
 
-    def do_history(self, hist_access_type, output, raw, session=None, start=None,
+    def do_history(self, hist_access_type, output, raw, session=0, start=None,
                    stop=None, n=None, pattern=None, unique=False):
         """Override in subclasses to access history.
         """
