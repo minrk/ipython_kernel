@@ -32,6 +32,10 @@ from ipython_genutils import py3compat
 MASTER = 0
 CHILD = 1
 
+# drop the first this-many iopub messages,
+# to mock iopub subscription-propagation delays
+IOPUB_DROP_COUNT = 30 
+
 #-----------------------------------------------------------------------------
 # IO classes
 #-----------------------------------------------------------------------------
@@ -69,6 +73,7 @@ class IOPubThread(object):
         self._setup_event_pipe()
         self.thread = threading.Thread(target=self._thread_main)
         self.thread.daemon = True
+        self.counter = 0
 
     def _thread_main(self):
         """The inner loop that's actually run in a thread"""
@@ -214,6 +219,11 @@ class IOPubThread(object):
     def _really_send(self, msg, *args, **kwargs):
         """The callback that actually sends messages"""
         mp_mode = self._check_mp_mode()
+        if self.counter < IOPUB_DROP_COUNT:
+            sys.__stderr__.write("Not sending %r" % msg)
+            sys.__stderr__.flush()
+            self.counter += 1
+            return
 
         if mp_mode != CHILD:
             # we are master, do a regular send
